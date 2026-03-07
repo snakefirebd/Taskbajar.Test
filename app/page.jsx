@@ -1,6 +1,9 @@
+// File Path: app/page.js "important message for gemini ai - this is dashboard"
+
 "use client";
 
 import React, { useEffect, useState, useRef } from 'react';
+import { useRouter } from 'next/navigation'; // <-- useRouter ইম্পোর্ট করা হলো
 import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { getDatabase, ref, onValue, set, serverTimestamp, get } from 'firebase/database';
@@ -59,6 +62,8 @@ const prizes = [
 ];
 
 export default function TaskBazarApp() {
+    const router = useRouter(); // <-- router ইনিশিয়ালাইজ করা হলো
+
     const [user, setUser] = useState(null);
     const [userData, setUserData] = useState({ points: 0, name: "User", avatar: "" });
     const [currentLang, setCurrentLang] = useState('bn');
@@ -524,7 +529,7 @@ export default function TaskBazarApp() {
                         <div style={{ fontSize: '3rem', marginBottom: '10px' }}>👋</div>
                         <h3 style={{ fontWeight: 800, fontSize: '1.3rem', color: '#0f172a', marginBottom: '8px' }}>অ্যাকাউন্ট প্রয়োজন!</h3>
                         <p style={{ fontSize: '0.85rem', color: '#64748b', marginBottom: '25px' }}>সকল ফিচার ব্যবহার করতে এবং আয় শুরু করতে দয়া করে লগইন বা সাইন আপ করুন।</p>
-                        <button className="btn-elite" onClick={() => window.location.href = '/login'}>লগইন / সাইন আপ</button>
+                        <button className="btn-elite" onClick={() => router.push('/login')}>লগইন / সাইন আপ</button>
                         <button className="btn-elite btn-ghost" onClick={handleHideAuthPopup}>পরে করব</button>
                     </div>
                 </div>
@@ -537,7 +542,7 @@ export default function TaskBazarApp() {
                     <div className="header-content">
                         {user ? (
                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                <div className="avatar-frame" onClick={() => window.location.href='/profile'}>
+                                <div className="avatar-frame" onClick={() => router.push('/profile')}>
                                     <img src={userData.avatar} onError={(e) => {e.target.src="https://cdn-icons-png.flaticon.com/512/149/149071.png"}} alt="Avatar"/>
                                 </div>
                                 <div>
@@ -547,7 +552,7 @@ export default function TaskBazarApp() {
                             </div>
                         ) : (
                             <div style={{ display: 'flex', alignItems: 'center' }}>
-                                <button onClick={() => window.location.href='/login'} style={{ background: 'white', color: '#6366f1', border: 'none', padding: '8px 16px', borderRadius: '12px', fontWeight: 800, fontSize: '0.8rem', cursor: 'pointer', boxShadow: '0 4px 10px rgba(0,0,0,0.1)', transition: '0.3s' }}>Login</button>
+                                <button onClick={() => router.push('/login')} style={{ background: 'white', color: '#6366f1', border: 'none', padding: '8px 16px', borderRadius: '12px', fontWeight: 800, fontSize: '0.8rem', cursor: 'pointer', boxShadow: '0 4px 10px rgba(0,0,0,0.1)', transition: '0.3s' }}>Login</button>
                             </div>
                         )}
 
@@ -588,7 +593,7 @@ export default function TaskBazarApp() {
                                     <div style={{ fontSize: '1.5rem', marginBottom: '3px' }}>🎁</div>
                                     <p style={{ fontSize: '0.65rem', fontWeight: 800, color: '#10b981' }}>{t.gift}</p>
                                 </div>
-                                <div className="elite-card" style={{ padding: '12px 5px', textAlign: 'center', cursor: 'pointer', marginBottom: 0, border: '1.5px dashed #f59e0b', background: '#fffbeb' }} onClick={() => window.location.href='/specialoffers'}>
+                                <div className="elite-card" style={{ padding: '12px 5px', textAlign: 'center', cursor: 'pointer', marginBottom: 0, border: '1.5px dashed #f59e0b', background: '#fffbeb' }} onClick={() => router.push('/specialoffers')}>
                                     <div style={{ fontSize: '1.5rem', marginBottom: '3px' }}>🎊</div>
                                     <p style={{ fontSize: '0.65rem', fontWeight: 800, color: '#d97706' }}>{t.offers}</p>
                                 </div>
@@ -698,10 +703,10 @@ export default function TaskBazarApp() {
                 {/* Footer NavBar */}
                 <div className={`nav-bar-container ${navOpen ? 'open' : ''}`}>
                     <div className="expanded-menu">
-                        <a href="/leaderboard" className="nav-item">
+                        <div onClick={() => router.push('/leaderboard')} className="nav-item">
                             <i style={{ background: '#fdf2f8', width: '35px', height: '35px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '4px' }}>🏆</i>
                             <span style={{ fontSize: '0.6rem' }}>Leaderboard</span>
-                        </a>
+                        </div>
                         <div onClick={() => { handleSetView('support-view'); setNavOpen(false); }} className="nav-item">
                             <i style={{ background: '#f1f5f9', width: '35px', height: '35px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '4px' }}>🛠️</i>
                             <span style={{ fontSize: '0.6rem' }}>Support</span>
@@ -710,8 +715,8 @@ export default function TaskBazarApp() {
 
                     <div className="nav-bar">
                         <div className={`nav-item ${view === 'list-view' ? 'active' : ''}`} onClick={() => handleSetView('list-view')}><i>🏠</i><span>{t.navMissions}</span></div>
-                        <div className="nav-item" onClick={() => window.location.href='/order'}><i>🚀</i><span>{t.navPromote}</span></div>
-                        <div className="nav-item" onClick={() => window.location.href='/profile'}><i>👤</i><span>{t.navProfile}</span></div>
+                        <div className="nav-item" onClick={() => router.push('/order')}><i>🚀</i><span>{t.navPromote}</span></div>
+                        <div className="nav-item" onClick={() => router.push('/profile')}><i>👤</i><span>{t.navProfile}</span></div>
                         <div className="nav-item" onClick={toggleMenu}>
                             <i style={{ transition: '0.3s', fontStyle: 'normal', fontSize: '1.3rem', transform: navOpen ? 'rotate(45deg)' : 'rotate(0deg)' }}>+</i>
                             <span>Menu</span>
