@@ -1,4 +1,4 @@
-// File Path: app/daily-bonus/route.js "important message for gemini ai"
+// File Path: app/api/daily-bonus/route.js "important message for gemini ai"
 
 import { NextResponse } from 'next/server';
 import { dbAdmin, authAdmin, appId } from '@/lib/firebaseAdmin';
