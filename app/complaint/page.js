@@ -79,12 +79,12 @@ export default function ComplaintPage() {
     const [currentLang, setCurrentLang] = useState('bn');
     const [toast, setToast] = useState({ msg: "", visible: false });
     const [navOpen, setNavOpen] = useState(false);
-    
+
     // Form States
     const [complaintPage, setComplaintPage] = useState("Home/Missions");
     const [complaintDetails, setComplaintDetails] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
-    
+
     // History State
     const [historyList, setHistoryList] = useState([]);
     const [isLoadingHistory, setIsLoadingHistory] = useState(true);
@@ -119,7 +119,7 @@ export default function ComplaintPage() {
                         .map(k => ({ id: k, ...all[k] }))
                         .filter(c => c.userId === currentUser.uid)
                         .sort((a, b) => b.timestamp - a.timestamp);
-                    
+
                     setHistoryList(myComplaints);
                     setIsLoadingHistory(false);
                 });
@@ -155,7 +155,7 @@ export default function ComplaintPage() {
 
         setIsSubmitting(true);
         const cid = "comp_" + Date.now();
-        
+
         try {
             const complaintRef = ref(db, `artifacts/${appId}/public/data/complaints/${cid}`);
             await set(complaintRef, {
@@ -166,7 +166,7 @@ export default function ComplaintPage() {
                 reply: '',
                 timestamp: serverTimestamp()
             });
-            
+
             showToast(t.successSubmit);
             setComplaintDetails("");
         } catch (e) {
@@ -287,7 +287,7 @@ export default function ComplaintPage() {
             {/* Main Content */}
             <div className="container">
                 <h3 style={{ fontSize: '1rem', fontWeight: 800, margin: '15px 0 10px 5px' }}>{t.titleCenter}</h3>
-                
+
                 <div className="elite-card">
                     <div className="input-group">
                         <label>{t.selectPage}</label>
@@ -318,7 +318,7 @@ export default function ComplaintPage() {
                 </div>
 
                 <h3 style={{ fontSize: '0.9rem', fontWeight: 800, margin: '20px 0 10px 5px' }}>{t.historyTitle}</h3>
-                
+
                 <div id="history-list">
                     {isLoadingHistory ? (
                         <p style={{ textAlign: 'center', fontSize: '0.75rem', color: '#64748b', padding: '20px' }}>Loading...</p>
@@ -337,7 +337,7 @@ export default function ComplaintPage() {
                                         {new Date(c.timestamp).toLocaleString(currentLang === 'bn' ? 'bn-BD' : 'en-US')}
                                     </div>
                                     <p style={{ fontSize: '0.75rem', color: '#475569' }}>{c.details}</p>
-                                    
+
                                     {c.reply && (
                                         <div style={{ marginTop: '10px', padding: '10px', background: '#f8fafc', borderRadius: '10px', fontSize: '0.7rem', border: '1px dashed #cbd5e1' }}>
                                             <b>{t.adminReply}</b> {c.reply}
@@ -357,7 +357,7 @@ export default function ComplaintPage() {
                         <i style={{ background: '#fdf2f8', width: '35px', height: '35px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '4px' }}>🏆</i>
                         <span style={{ fontSize: '0.6rem' }}>{t.navLeaderboard}</span>
                     </div>
-                    
+
                     <div onClick={() => router.push('/complaint')} className="nav-item active">
                         <i style={{ background: '#f1f5f9', width: '35px', height: '35px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '4px' }}>🛠️</i>
                         <span style={{ fontSize: '0.6rem' }}>{t.navSupport}</span>
@@ -377,4 +377,3 @@ export default function ComplaintPage() {
         </>
     );
 }
-
