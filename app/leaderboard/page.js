@@ -6,7 +6,7 @@ import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
-import { getDatabase, ref, onValue } from 'firebase/database';
+import { getDatabase, ref, query, orderByChild, limitToLast, onValue } from 'firebase/database'; // Query ইম্পোর্ট করা হয়েছে
 
 // Firebase Config Environment Variable থেকে একটিমাত্র JSON string হিসেবে লোড করা হচ্ছে
 let firebaseConfig = {};
@@ -60,7 +60,7 @@ export default function LeaderboardPage() {
     const [userData, setUserData] = useState({ points: 0, name: "Member", avatar: defaultAvatar });
     const [currentLang, setCurrentLang] = useState('bn');
     const [navOpen, setNavOpen] = useState(false);
-    
+
     // Leaderboard Data
     const [leaderboardData, setLeaderboardData] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -73,7 +73,7 @@ export default function LeaderboardPage() {
         setCurrentLang(savedLang);
 
         const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-            if (currentUser && appId) { // appId চেক করে নেওয়া হচ্ছে
+            if (currentUser && appId) { 
                 setUser(currentUser);
                 const statsRef = ref(db, `artifacts/${appId}/users/${currentUser.uid}/stats`);
                 onValue(statsRef, (snap) => {
@@ -92,35 +92,41 @@ export default function LeaderboardPage() {
         return () => unsubscribe();
     }, [router]);
 
-    // Fetch All Users for Leaderboard
+    // Fetch Only Top 50 Users for Leaderboard
     useEffect(() => {
         if (!appId) return;
 
-        const usersRef = ref(db, `artifacts/${appId}/users`);
-        const unsubscribe = onValue(usersRef, (snapshot) => {
-            const data = snapshot.val();
-            if (data) {
-                const list = [];
-                Object.keys(data).forEach(uid => {
-                    const stats = data[uid].stats || {};
-                    // Filter out empty or basic default names with 0 points
-                    if (stats.points > 0 || (stats.name && stats.name !== 'Google User')) {
-                        list.push({
-                            uid,
-                            name: stats.name || 'Member',
-                            points: stats.points || 0,
-                            avatar: (stats.avatar && stats.avatar !== "null" && stats.avatar !== "undefined") ? stats.avatar : defaultAvatar
-                        });
-                    }
-                });
+        // Query: users নোড থেকে stats/points এর ভিত্তিতে শেষ ৫০ জন (অর্থাৎ সর্বোচ্চ পয়েন্টধারী) কে আনা হচ্ছে
+        const topUsersQuery = query(
+            ref(db, `artifacts/${appId}/users`), 
+            orderByChild('stats/points'), 
+            limitToLast(50)
+        );
+
+        const unsubscribe = onValue(topUsersQuery, (snapshot) => {
+            const list = [];
+            
+            // forEach ব্যবহার করা হয়েছে যাতে ফায়ারবেসের পাঠানো অর্ডার (ছোট থেকে বড়) ঠিক থাকে
+            snapshot.forEach((childSnapshot) => {
+                const uid = childSnapshot.key;
+                const stats = childSnapshot.val().stats || {};
                 
-                // Sort by points descending
-                list.sort((a, b) => b.points - a.points);
-                setLeaderboardData(list.slice(0, 50)); // Display Top 50
-                setIsLoading(false);
-            } else {
-                setIsLoading(false);
-            }
+                // Filter out empty or basic default names with 0 points
+                if (stats.points > 0 || (stats.name && stats.name !== 'Google User')) {
+                    list.push({
+                        uid,
+                        name: stats.name || 'Member',
+                        points: stats.points || 0,
+                        avatar: (stats.avatar && stats.avatar !== "null" && stats.avatar !== "undefined") ? stats.avatar : defaultAvatar
+                    });
+                }
+            });
+
+            // Firebase 'limitToLast' ছোট থেকে বড় (Ascending) অর্ডারে ডাটা দেয়, তাই বড় থেকে ছোট (Descending) করার জন্য reverse করা হলো।
+            list.reverse();
+            
+            setLeaderboardData(list); 
+            setIsLoading(false);
         });
 
         return () => unsubscribe();
@@ -305,7 +311,7 @@ export default function LeaderboardPage() {
                             {RestList.map((lbUser, index) => {
                                 const rank = index + 4;
                                 const isMe = user && user.uid === lbUser.uid;
-                                
+
                                 return (
                                     <div key={lbUser.uid} className="lb-item" style={isMe ? { borderColor: '#818cf8', background: '#f8fafc', borderWidth: '1.5px' } : {}}>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
@@ -333,7 +339,7 @@ export default function LeaderboardPage() {
                         <i style={{ background: '#fdf2f8', width: '35px', height: '35px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '4px' }}>🏆</i>
                         <span style={{ fontSize: '0.6rem' }}>{t.navLeaderboard}</span>
                     </div>
-                    
+
                     <div onClick={() => router.push('/complaint')} className="nav-item">
                         <i style={{ background: '#f1f5f9', width: '35px', height: '35px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '4px' }}>🛠️</i>
                         <span style={{ fontSize: '0.6rem' }}>{t.navSupport}</span>
@@ -353,4 +359,5 @@ export default function LeaderboardPage() {
         </>
     );
 }
+
 
