@@ -1,3 +1,5 @@
+// File Path: app/complaint/page.js "important message for gemini ai"
+
 "use client";
 
 import React, { useEffect, useState } from 'react';
@@ -6,22 +8,19 @@ import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { getDatabase, ref, onValue, set, serverTimestamp } from 'firebase/database';
 
-// Firebase Config
-const firebaseConfig = {
-    apiKey: "AIzaSyDgFaTrHW7Grp_Q22p6KNcHZxaEujHsLsE",
-    authDomain: "exchange-project-d4028.firebaseapp.com",
-    databaseURL: "https://exchange-project-d4028-default-rtdb.asia-southeast1.firebasedatabase.app",
-    projectId: "exchange-project-d4028",
-    storageBucket: "exchange-project-d4028.firebasestorage.app",
-    messagingSenderId: "313976742479",
-    appId: "1:313976742479:web:45951b360d875c4768c03a"
-};
+// Firebase Config Environment Variable থেকে একটিমাত্র JSON string হিসেবে লোড করা হচ্ছে
+let firebaseConfig = {};
+try {
+    firebaseConfig = JSON.parse(process.env.NEXT_PUBLIC_FIREBASE_CONFIG || '{}');
+} catch (error) {
+    console.error("Firebase config parse error:", error);
+}
 
 // Initialize Firebase
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 const auth = getAuth(app);
-const db = getDatabase(app);
-const appId = "exchange-project-d4028";
+const db = getDatabase(app); // Realtime Database ব্যবহার করা হচ্ছে
+const appId = firebaseConfig.projectId; // JSON থেকে projectId নেওয়া হলো
 const defaultAvatar = "https://cdn-icons-png.flaticon.com/512/149/149071.png";
 
 const translations = {
@@ -98,7 +97,7 @@ export default function ComplaintPage() {
         setCurrentLang(savedLang);
 
         const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-            if (currentUser) {
+            if (currentUser && appId) { // appId চেক করে নেওয়া হচ্ছে
                 setUser(currentUser);
 
                 // User Stats
@@ -125,7 +124,7 @@ export default function ComplaintPage() {
                     setIsLoadingHistory(false);
                 });
 
-            } else {
+            } else if (!currentUser) {
                 router.push('/login');
             }
         });
@@ -152,6 +151,7 @@ export default function ComplaintPage() {
         if (!complaintDetails.trim()) {
             return showToast(t.errorEmpty);
         }
+        if (!appId) return showToast(t.errorSubmit);
 
         setIsSubmitting(true);
         const cid = "comp_" + Date.now();
