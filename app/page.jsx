@@ -8,22 +8,24 @@ import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { getDatabase, ref, onValue, set, serverTimestamp, get } from 'firebase/database';
 
-// Firebase Config
+// Firebase Config (Environment Variables থেকে লোড করা হচ্ছে)
 const firebaseConfig = {
-    apiKey: "AIzaSyDgFaTrHW7Grp_Q22p6KNcHZxaEujHsLsE",
-    authDomain: "exchange-project-d4028.firebaseapp.com",
-    databaseURL: "https://exchange-project-d4028-default-rtdb.asia-southeast1.firebasedatabase.app",
-    projectId: "exchange-project-d4028",
-    storageBucket: "exchange-project-d4028.firebasestorage.app",
-    messagingSenderId: "313976742479",
-    appId: "1:313976742479:web:45951b360d875c4768c03a"
+    apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+    authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+    databaseURL: process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL,
+    projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+    storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+    appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID
 };
 
 // Next.js এ একাধিকবার ইনিশিয়ালাইজেশন এড়াতে এই পদ্ধতি
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 const auth = getAuth(app);
-const db = getDatabase(app);
-const appId = "exchange-project-d4028";
+const db = getDatabase(app); // Realtime Database ব্যবহার করা হচ্ছে
+
+// appId এর জন্যও environment variable ব্যবহার করা হলো
+const appId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID; 
 
 const translations = {
     bn: {
@@ -728,3 +730,4 @@ export default function TaskBazarApp() {
         </>
     );
 }
+
